@@ -92,7 +92,7 @@
   .toggle.on{background:var(--violet)} .toggle.on .knob{left:23px}
   .warmcard{border-color:var(--violet)!important;background:var(--violet-soft)} .warmcard .ic{width:22px;height:22px;color:var(--violet);flex:none}
   .modebanner{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:11px 14px;border-radius:var(--r);background:var(--accent-soft);color:var(--accent-ink);font-size:13.5px;font-weight:600}
-  .modebanner.v{background:var(--violet-soft);color:var(--violet)} .modebanner .ic{width:18px;height:18px} .modebanner a{margin-left:auto;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;color:inherit}
+  .modebanner.v{background:var(--violet-soft);color:var(--violet)} .modebanner .ic{width:18px;height:18px} .modebanner a,.modebanner .bnlink{margin-left:auto;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline;color:inherit;border:none;background:none;font-family:inherit;padding:0}
   html.snappy .card,html.snappy .mode,html.snappy .tip,html.snappy .track{animation-duration:.12s!important}
   .mode{display:flex;flex-direction:column;text-align:left;width:100%;border:1px solid var(--line);background:var(--card);border-radius:var(--r);padding:17px;gap:7px;box-shadow:var(--shadow);transition:transform .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease)}
   .mode:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--shadow-lg)}
@@ -165,7 +165,7 @@
     <div class="brand"><span class="logo">Σ</span><div>Statistiek II<small>Berie’s exam space</small></div></div>
     <span class="spacer"></span>
     <a class="iconbtn" href="https://berat007yildirim-ai.github.io/" title="Andere vakken"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Vakken</span></a>
-    <button class="iconbtn" id="themeBtn" aria-label="Licht/donker"></button>
+    <button class="iconbtn" id="themeBtn" aria-label="Wissel tussen licht en donker thema"></button>
   </div>
   <nav class="tabs" id="tabs"></nav>
 </header>
@@ -345,13 +345,15 @@ window.STAT = {
   function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
   function lget(k,d){ try{ var v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } }
   function lset(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+  function rawGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function rawSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 
   D.questions.forEach(function(q,i){ q.id="q"+i; });
-  var theme=lget("stat_theme", lget("site_theme","light"));
+  var theme=rawGet("site_theme") || lget("stat_theme","light");
   function applyTheme(){ document.documentElement.setAttribute("data-theme",theme);
     document.getElementById("themeBtn").innerHTML=(theme==="dark"?ic("sun"):ic("moon"))+'<span>'+(theme==="dark"?"Licht":"Donker")+'</span>'; }
   applyTheme();
-  document.getElementById("themeBtn").onclick=function(){ theme=theme==="dark"?"light":"dark"; lset("stat_theme",theme); lset("site_theme",theme); applyTheme(); };
+  document.getElementById("themeBtn").onclick=function(){ theme=theme==="dark"?"light":"dark"; lset("stat_theme",theme); rawSet("site_theme",theme); applyTheme(); };
   var calm=lget("stat_calm",true);
   function applyCalm(){ document.documentElement.classList.toggle("snappy", !calm); }
   applyCalm();
@@ -365,7 +367,7 @@ window.STAT = {
   var tabsEl=document.getElementById("tabs");
   tabsEl.innerHTML=TABS.map(function(t){return '<button data-view="'+t.v+'"'+(t.v==="home"?' class="on"':'')+'>'+ic(t.i)+'<span>'+t.l+'</span></button>';}).join("");
   var tabBtns=[].slice.call(tabsEl.querySelectorAll("button"));
-  tabBtns.forEach(function(b){ b.onclick=function(){ if(b.dataset.view==="home") state.step="track"; go(b.dataset.view); }; });
+  tabBtns.forEach(function(b){ b.onclick=function(){ state.fromHub=false; if(b.dataset.view==="home") state.step="track"; go(b.dataset.view); }; });
   function go(v){ state.view=v; tabBtns.forEach(function(b){b.classList.toggle("on",b.dataset.view===v);}); render(); window.scrollTo(0,0); }
 
   var state={view:"home", step:"track", track:lget("stat_track","training"), quiz:null, sel:{topics:{kans:true,toets:true,concept:true}, count:15, shuffle:true}, sumq:""};
@@ -424,7 +426,7 @@ window.STAT = {
     var herk=state.track==="herkansing";
     var html=
       '<button class="backlink" id="backBtn">'+ic("back")+'Terug</button>'+
-      '<div class="modebanner'+(herk?" v":"")+'">'+ic(herk?"heart":"book")+'<span>'+modeLabel()+'</span><a id="changeMode">wijzig</a></div>'+
+      '<div class="modebanner'+(herk?" v":"")+'">'+ic(herk?"heart":"book")+'<span>'+modeLabel()+'</span><button type="button" class="bnlink" id="changeMode">wijzig</button></div>'+
       '<div class="seclabel">'+ic("rocket")+'Waarmee wil je oefenen?</div>'+
       '<div class="grid g2">'+
         '<button class="mode" data-mode="quiz"><span class="me">'+ic("target")+'</span><b>Oefenvragen</b><small>Meerkeuze met directe feedback en uitleg. Kies je onderwerpen.</small></button>'+
@@ -434,7 +436,7 @@ window.STAT = {
     document.getElementById("backBtn").onclick=function(){ if(state.fromHub){ location.href="https://berat007yildirim-ai.github.io/"; return; } state.step=(herk?"herkansing":"track"); renderHome(); window.scrollTo(0,0); };
     document.getElementById("changeMode").onclick=function(){ if(state.fromHub){ location.href="https://berat007yildirim-ai.github.io/"; return; } state.step="track"; renderHome(); window.scrollTo(0,0); };
     document.querySelector('[data-mode="quiz"]').onclick=function(){ go("quiz"); };
-    document.getElementById("quickStart").onclick=function(){ startQuiz(shuffle(D.questions.slice()).slice(0,15)); go("quiz"); };
+    document.getElementById("quickStart").onclick=function(){ state.view="quiz"; tabBtns.forEach(function(b){b.classList.toggle("on",b.dataset.view==="quiz");}); startQuiz(shuffle(D.questions.slice()).slice(0,15)); window.scrollTo(0,0); };
   }
 
   function renderQuizGate(){
