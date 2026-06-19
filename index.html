@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0f6e6a" />
+<title>Statistiek II — Berie’s exam space</title>
+<style>
+  :root{
+    --bg:#f4f2ee; --bg2:#ebe8e2; --card:#ffffff; --ink:#1b232c; --muted:#5d6873;
+    --line:#e2ddd4; --accent:#0f6e6a; --accent-ink:#0b4f4c; --accent-soft:#dcefed;
+    --amber:#c9821f; --amber-soft:#f7ecd9; --violet:#6d5bd0; --violet-soft:#e9e6fa;
+    --good:#1f8a4c; --good-soft:#e2f3e8; --bad:#c23b54; --bad-soft:#fbe5ea;
+    --shadow:0 1px 2px rgba(20,30,40,.05),0 6px 18px rgba(20,30,40,.05);
+    --shadow-lg:0 2px 6px rgba(20,30,40,.06),0 18px 40px rgba(20,30,40,.10);
+    --r:14px; --r-lg:20px; --ease:cubic-bezier(.2,.8,.2,1);
+  }
+  html[data-theme="dark"]{
+    --bg:#11151a; --bg2:#161b22; --card:#1b222b; --ink:#e7ecf1; --muted:#9aa6b2;
+    --line:#2a323c; --accent:#3fb9b2; --accent-ink:#7fd6d0; --accent-soft:#163230;
+    --amber:#e0a64a; --amber-soft:#2e2515; --violet:#a99cf0; --violet-soft:#221d3a;
+    --good:#46c178; --good-soft:#16301f; --bad:#ef6b82; --bad-soft:#331620;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+    --shadow-lg:0 2px 8px rgba(0,0,0,.4),0 22px 48px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.55;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;letter-spacing:-.01em}
+  button,a{font-family:inherit;cursor:pointer;color:inherit}
+  .wrap{max-width:880px;margin:0 auto;padding:0 18px 96px}
+  :focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .ic{width:1.25em;height:1.25em;flex:none;vertical-align:-.18em;stroke:currentColor;stroke-width:1.75;
+    stroke-linecap:round;stroke-linejoin:round;fill:none}
+
+  header.top{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);
+    background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:saturate(140%) blur(12px);-webkit-backdrop-filter:saturate(140%) blur(12px)}
+  .topin{max-width:880px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:700}
+  .logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(145deg,var(--accent),var(--accent-ink));
+    color:#fff;display:grid;place-items:center;font-family:Georgia,serif;font-weight:700;font-size:16px;flex:none;
+    box-shadow:0 2px 6px rgba(15,110,106,.35)}
+  .brand small{display:block;font-weight:500;color:var(--muted);font-size:11px}
+  .spacer{flex:1}
+  .iconbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;min-height:38px;
+    padding:7px 11px;font-size:13.5px;display:inline-flex;gap:7px;align-items:center;text-decoration:none;
+    transition:border-color .2s var(--ease),transform .12s var(--ease)}
+  .iconbtn:hover{border-color:var(--accent)} .iconbtn:active{transform:scale(.96)}
+  nav.tabs{display:flex;gap:2px;overflow:auto;max-width:880px;margin:0 auto;padding:6px 12px 0;scrollbar-width:none}
+  nav.tabs::-webkit-scrollbar{display:none}
+  nav.tabs button{border:none;background:none;color:var(--muted);padding:10px 13px;border-radius:9px 9px 0 0;
+    font-size:14px;font-weight:600;white-space:nowrap;border-bottom:2px solid transparent;display:inline-flex;align-items:center;gap:6px;transition:color .2s var(--ease)}
+  nav.tabs button .ic{width:16px;height:16px}
+  nav.tabs button.on{color:var(--accent-ink);border-bottom-color:var(--accent)}
+  nav.tabs button:hover{color:var(--ink)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+  .pad{padding:20px}
+  .muted{color:var(--muted)}
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink)}
+  .pill.amber{background:var(--amber-soft);color:var(--amber)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .grid{display:grid;gap:14px}
+  @media(min-width:620px){.g2{grid-template-columns:1fr 1fr}}
+
+  .hero{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin:20px 0 8px}
+  .count{flex:none;background:linear-gradient(150deg,var(--accent),var(--accent-ink));color:#fff;border-radius:var(--r);padding:14px 20px;text-align:center;min-width:118px;box-shadow:0 8px 20px rgba(15,110,106,.28)}
+  .count b{font-family:Georgia,serif;font-size:32px;display:block;line-height:1}
+  .count span{font-size:12px;opacity:.92}
+  .herotext h1{margin:0 0 4px;font-size:25px}
+  .herotext p{margin:0;color:var(--muted)}
+
+  .brandstrip{display:flex;align-items:center;gap:13px;width:100%;text-decoration:none;color:inherit;border:1px solid var(--line);background:var(--card);border-radius:var(--r);padding:12px 16px;margin:14px 0 2px;box-shadow:var(--shadow);transition:border-color .2s var(--ease),transform .15s var(--ease)}
+  .brandstrip:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .brandstrip .bs-logo{width:36px;height:36px;border-radius:10px;flex:none;display:grid;place-items:center;color:#fff;font-family:Georgia,serif;font-weight:700;font-size:17px;background:linear-gradient(145deg,var(--accent),var(--accent-ink))}
+  .brandstrip .bs-txt{flex:1;min-width:0} .brandstrip .bs-txt b{display:block;font-size:14.5px} .brandstrip .bs-txt small{color:var(--muted);font-size:12.5px}
+  .brandstrip .bs-go{color:var(--accent-ink);flex:none;display:inline-flex} .brandstrip .bs-go .ic{width:18px;height:18px}
+
+  .seclabel{display:flex;align-items:center;gap:8px;margin:24px 0 12px;font-weight:700;font-size:15px}
+  .seclabel .ic{width:18px;height:18px;color:var(--accent-ink)}
+  .mode{display:flex;flex-direction:column;text-align:left;width:100%;border:1px solid var(--line);background:var(--card);border-radius:var(--r);padding:17px;gap:7px;box-shadow:var(--shadow);transition:transform .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease)}
+  .mode:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+  .mode .me{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink)} .mode .me .ic{width:22px;height:22px}
+  .mode b{font-size:16px} .mode small{color:var(--muted);font-size:13px}
+
+  label.fld{display:block;font-size:13px;font-weight:600;margin:16px 0 7px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;min-height:38px;padding:7px 13px;font-size:13.5px;transition:all .18s var(--ease)}
+  .chip:hover{border-color:var(--accent)} .chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:11px;min-height:46px;padding:12px 20px;font-size:15px;font-weight:600;display:inline-flex;align-items:center;gap:8px;justify-content:center;box-shadow:0 4px 12px rgba(15,110,106,.25);transition:background .2s var(--ease),transform .12s var(--ease)}
+  .btn:hover{background:var(--accent-ink)} .btn:active{transform:scale(.97)} .btn .ic{width:18px;height:18px}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:none} .btn.ghost:hover{border-color:var(--accent)}
+  .btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+  input[type=search],input[type=text],input[type=email],textarea{font-family:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);width:100%}
+  input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+
+  .runtop{display:flex;align-items:center;gap:12px;margin:2px 0 14px;font-size:13px;color:var(--muted)}
+  .bar{height:8px;border-radius:6px;background:var(--bg2);overflow:hidden;flex:1}
+  .bar>i{display:block;height:100%;width:0;background:var(--accent);border-radius:6px;transition:width .7s var(--ease)}
+  .qtext{font-size:19px;font-weight:600;margin:8px 0 16px;font-family:Georgia,serif;line-height:1.45}
+  .opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:14px 15px;margin-bottom:10px;font-size:15px;transition:border-color .15s var(--ease),background .15s var(--ease),transform .12s var(--ease)}
+  .opt:hover:not(:disabled){border-color:var(--accent);background:var(--accent-soft)} .opt:active:not(:disabled){transform:scale(.99)}
+  .opt .k{flex:none;width:27px;height:27px;border-radius:8px;background:var(--bg2);color:var(--muted);display:grid;place-items:center;font-weight:700;font-size:13px}
+  .opt.correct{border-color:var(--good);background:var(--good-soft)} .opt.correct .k{background:var(--good);color:#fff}
+  .opt.wrong{border-color:var(--bad);background:var(--bad-soft)} .opt.wrong .k{background:var(--bad);color:#fff}
+  .opt:disabled{cursor:default}
+  .feedback{border-radius:12px;padding:13px 15px;margin:4px 0 12px;font-size:14.5px}
+  .feedback.ok{background:var(--good-soft);color:var(--good)} .feedback.no{background:var(--bad-soft);color:var(--bad)}
+  .feedback b{font-weight:700} .feedback .sub{display:block;margin-top:3px;color:var(--ink);font-weight:500;opacity:.92}
+  .whybtn{border:1px solid var(--line);background:var(--card);color:var(--accent-ink);border-radius:10px;min-height:40px;padding:9px 14px;font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:7px;transition:border-color .2s var(--ease),background .2s var(--ease)}
+  .whybtn:hover{border-color:var(--accent);background:var(--accent-soft)} .whybtn .ic{width:16px;height:16px}
+  .whybox{border:1px solid var(--accent);background:var(--accent-soft);border-radius:12px;padding:14px 16px;margin:12px 0 4px;font-size:14px;line-height:1.55}
+  .whybox h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent-ink);font-family:system-ui;display:flex;align-items:center;gap:7px}
+  .whybox .ic{width:16px;height:16px}
+
+  .acc{border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;background:var(--card);overflow:hidden;box-shadow:var(--shadow)}
+  .acc>summary{padding:15px 16px;font-weight:700;cursor:pointer;list-style:none;display:flex;align-items:center;gap:11px}
+  .acc>summary::-webkit-details-marker{display:none}
+  .acc>summary .n{flex:none;width:28px;height:28px;border-radius:8px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;font-size:13px;font-weight:700}
+  .acc>summary .caret{margin-left:auto;color:var(--muted);transition:transform .25s var(--ease)} .acc[open]>summary .caret{transform:rotate(90deg)}
+  .acc[open]>summary{border-bottom:1px solid var(--line)} .acc .body{padding:6px 18px 16px}
+  .acc h4{margin:14px 0 6px;font-size:13px;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.4px;font-family:system-ui}
+  .acc ul{margin:0;padding-left:20px} .acc li{margin:6px 0;font-size:14.5px;line-height:1.5}
+  .acc.hack li::marker{content:"💡  "} .acc.hack>summary .n{background:var(--violet-soft);color:var(--violet)}
+  mark{background:var(--amber-soft);color:inherit;padding:0 2px;border-radius:3px}
+
+  .tip{border:1px solid var(--line);background:var(--card);border-radius:var(--r);padding:15px;box-shadow:var(--shadow)}
+  .tip h4{margin:0 0 5px;font-size:14.5px;display:flex;align-items:center;gap:8px;font-family:system-ui} .tip h4 .ic{width:18px;height:18px;color:var(--violet)}
+  .tip p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.55}
+  .tipgrid{display:grid;gap:12px} @media(min-width:620px){.tipgrid{grid-template-columns:1fr 1fr}}
+
+  .results .big{font-family:Georgia,serif;font-size:54px;text-align:center;margin:8px 0;line-height:1}
+  .center{text-align:center} .hide{display:none!important}
+  footer{margin-top:34px;text-align:center;color:var(--muted);font-size:13px}
+  .kbd{font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--muted)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.03)}100%{transform:scale(1)}}
+  @media (prefers-reduced-motion: no-preference){
+    .card,.mode,.tip{animation:fadeUp .34s var(--ease) both}
+    .feedback,.whybox{animation:slideIn .26s var(--ease) both} .opt.correct{animation:pop .34s var(--ease)}
+  }
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="topin">
+    <div class="brand"><span class="logo">Σ</span><div>Statistiek II<small>Berie’s exam space</small></div></div>
+    <span class="spacer"></span>
+    <a class="iconbtn" href="https://berat007yildirim-ai.github.io/" title="Andere vakken"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Vakken</span></a>
+    <button class="iconbtn" id="themeBtn" aria-label="Licht/donker"></button>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+<div class="wrap" id="app"></div>
+<footer class="wrap" style="padding-top:0">Statistiek II · Berie’s exam space — oefenvragen nagerekend en geverifieerd · veel succes!</footer>
+
+<script>
+window.STAT = {
+  // topic: kans = kansrekenen/verdelingen, toets = toetsen & BI, concept = concepten/SPSS
+  questions: [
+    {t:"kans", q:"Het aantal seconden dat wolven huilen is scheef verdeeld met gemiddelde 25 s en standaarddeviatie 7 s. Wat is de kans dat 49 wolven gemiddeld minstens 26 s huilen (door toeval)?",
+     o:["15,87%","84,13%","ongeveer 20%","Niet genoeg gegevens"], a:0,
+     u:"Standaardfout = σ/√n = 7/√49 = 1. z = (26−25)/1 = 1, dus P(Z>1) = 1−0,8413 = 15,87%. De centrale limietstelling geldt (n=49 ≥ 30), dus de steekproevenverdeling is ongeveer normaal — ook al is de populatie scheef."},
+    {t:"kans", q:"Je gooit twee dobbelstenen. Wat is de kans dat je exact één 6 gooit?",
+     o:["1/6","5/36","10/36","12/36"], a:2,
+     u:"Eén 6 kan op twee manieren: (6, geen 6) of (geen 6, 6). P = 2 × (1/6)(5/6) = 10/36 ≈ 27,8%."},
+    {t:"kans", q:"100 personen: 60% is vrouw, 70% vlucht, en 75% van de mannen vlucht. Wat is P(man | niet-vluchten)?",
+     o:["10%","25%","33,33%","80%"], a:2,
+     u:"P(man)=0,4. P(niet vluchten | man)=1−0,75=0,25. P(niet vluchten)=1−0,70=0,30. Bayes: P(man | niet vl.) = 0,25·0,4 / 0,30 = 0,1/0,3 = 33,33%."},
+    {t:"kans", q:"Een onderzoekster kiest 7 testen uit 10 (volgorde maakt niet uit). De promotor koos al 4 vaste testen die er sowieso bij moeten. Hoeveel testbatterijen kan ze samenstellen?",
+     o:["C(6,3) = 20","V(3 uit 6) = 120","P(3) = 6","C(4,4)+C(6,3) = 21"], a:0,
+     u:"4 testen liggen vast, dus ze kiest nog 3 uit de overige 6, en de volgorde maakt niet uit → combinatie C(6,3) = 20."},
+    {t:"concept", q:"Welke eigenschap hoort NIET bij een goede schatter?",
+     o:["Zuiver (onvertekend)","Consistent","Efficiënt","Consequent"], a:3,
+     u:"Een goede schatter is zuiver (gemiddeld correct), consistent (beter bij grotere n) en efficiënt (zo klein mogelijke variantie). 'Consequent' is geen statistische eigenschap — verwarring met 'consistent'."},
+    {t:"toets", q:"Wat is juist over de p-waarde?",
+     o:["De kans dat de nulhypothese waar is","De kans op een toetsingsgrootheid die minstens zo extreem is, áls H0 waar is","Een hoge p-waarde bewijst dat H0 fout is","Een lage p-waarde bewijst dat Ha fout is"], a:1,
+     u:"De p-waarde = de kans op een (minstens zo extreme) toetsingsgrootheid onder de aanname dat H0 waar is. Het is NIET de kans dat H0 zelf waar is."},
+    {t:"toets", q:"De standaardafwijking σ is gekend. Als n groter wordt, wordt het betrouwbaarheidsinterval...",
+     o:["Breder","Smaller","Onveranderd","Afhankelijk van de populatie"], a:1,
+     u:"De foutenmarge = z·σ/√n. Een grotere n maakt √n groter, dus de marge kleiner → een smaller (preciezer) interval."},
+    {t:"toets", q:"Normaal geneest 50% na 3 maanden. Een therapeut beweert dat haar therapie beter werkt: 8 van haar 10 patiënten genazen. Hoe gaat ze na of dit significant is?",
+     o:["Kan niet, want minder dan 30 patiënten","Mét teruglegging modelleren met 2 'balletjes' (50/50, de populatie) en kijken hoe vaak je ≥ 8 haalt","Zónder teruglegging met 10 balletjes van de therapeut","Gewoon aannemen dat het betrouwbaar is"], a:1,
+     u:"Je simuleert onder H0 (p=0,5): trek mét teruglegging uit een model met 2 gelijke uitkomsten (genezen/niet), 10 keer, en kijk hoe vaak je ≥ 8 genezingen krijgt. Is dat zeldzaam (< 5%), dan is het significant."},
+    {t:"kans", q:"De kans op een glimlach is 0,5% (p = 0,005). Wat is de kans dat exact 2 van de 15 mensen glimlachen?",
+     o:["0,25%","2,5%","95%","Kan niet berekend worden"], a:0,
+     u:"Binomiaal B(n=15; p=0,005). P(X=2) = C(15,2)·0,005²·0,995¹³ ≈ 0,25%."},
+    {t:"kans", q:"6 kleuren snoep, je verwacht 1/6 van elke kleur. Merel koopt een kleine zak, Christine een grote. A: minder dan 10% groen. B: meer dan 25% rood. Wat is juist?",
+     o:["A én B zijn waarschijnlijker bij de kleine zak","A én B zijn waarschijnlijker bij de grote zak","A bij klein, B bij groot","Op toevalsbasis niet te zeggen"], a:0,
+     u:"A en B zijn beide afwijkingen van het verwachte 1/6 (≈16,7%). Bij een kleinere steekproef is de standaardfout groter, dus zulke afwijkingen zijn waarschijnlijker → beide bij de kleine zak."},
+    {t:"kans", q:"2500 deelnemers: 1200 hebben chronische stress, 1150 hebben slaaptekort, 785 hebben beide. Welke uitspraak is FOUT?",
+     o:["Stress en slaaptekort zijn niet-disjunct","P(stress ∩ slaaptekort) = 31,70%","P(stress ∪ slaaptekort) = 62,60%","P(stress ∩ géén slaaptekort) = 16,60%"], a:1,
+     u:"P(stress ∩ slaaptekort) = 785/2500 = 31,40% (niet 31,70%). De rest klopt: ∪ = (1200+1150−785)/2500 = 62,60%; stress ∩ géén slaaptekort = (1200−785)/2500 = 16,60%."},
+    {t:"toets", q:"Een steekproef geeft gemiddelde 33; populatiegemiddelde = 30; σ = 16; n = 64. Verschilt 33 significant van 30 (α = 10%, tweezijdig)?",
+     o:["Significant, z = 1,5, p = 0,0062","Niet-significant, z = 1,5, p = 0,1336","Niet-significant, z = 1,5, p = 0,9839","Significant, z = 2,5, p = 0,0124"], a:1,
+     u:"Standaardfout = 16/√64 = 2. z = (33−30)/2 = 1,5. Tweezijdig: p = 2·P(Z>1,5) = 2·0,0668 = 0,1336 = 13,36% > 10% → niet significant."},
+    {t:"toets", q:"Reactietijd: µ = 0,5 s, σ = 0,12 s. Een steekproef (n = 36) geeft gemiddeld 0,55 s. Reageren ze significant trager? (eenzijdig)",
+     o:["Ja, significant trager, z = 2,5 (p = 0,0062)","Nee, niet significant, z = 2,5 (p = 0,9475)","Significant sneller, z = 2,5","Kan niet berekend worden"], a:0,
+     u:"Standaardfout = 0,12/√36 = 0,02. z = (0,55−0,5)/0,02 = 2,5. Eenzijdig p = P(Z>2,5) = 0,0062 < 5% → significant. 0,55 > 0,5 betekent een lángere reactietijd = trager."},
+    {t:"kans", q:"Wat zegt de centrale limietstelling?",
+     o:["Bij n ≥ 30 gaat de steekproef op de populatieverdeling lijken","Als de steekproef groot genoeg is, benadert de steekproevenverdeling een normaalverdeling, ongeacht de vorm van de populatie","Bij n ≥ 30 pas je altijd continuïteitscorrectie toe","De populatie wordt normaalverdeeld bij grote n"], a:1,
+     u:"De CLT gaat over de verdeling van het steekproef-GEMIDDELDE: bij voldoende grote n is die ongeveer normaal, ongeacht de vorm van de populatie."},
+    {t:"kans", q:"4 ballen (zwart, geel, rood, groen). Je trekt ze alle 4 zonder teruglegging. Wat is de kans dat je zwart–geel–rood in die volgorde trekt (de eerste drie)?",
+     o:["0,0833","0,0416","0,25","0,0166"], a:1,
+     u:"P = 1/4 · 1/3 · 1/2 = 1/24 ≈ 0,0417. (De vierde bal is dan automatisch groen.)"},
+    {t:"kans", q:"80% van de kinderen lust ontbijtgranen. Wat is de kans dat minstens 3 van de 8 kleuters ze NIET lusten?",
+     o:["20,31%","79,69%","14,8%","48%"], a:0,
+     u:"Niet lusten: p = 0,20. X ~ B(8; 0,20). P(X ≥ 3) = 1 − P(X ≤ 2) = 1 − (0,168 + 0,336 + 0,294) = 1 − 0,797 = 20,31%."},
+    {t:"kans", q:"Ongeveer 30% van de patiënten komt binnen met een depressie. Wat is de kans dat minstens 15 van de 40 patiënten een depressie hebben?",
+     o:["19,49%","88,69%","50%","6,2%"], a:0,
+     u:"X ~ B(40; 0,30): µ = 12, σ = √(40·0,3·0,7) = 2,90. Met continuïteitscorrectie: z = (14,5−12)/2,90 = 0,86 → P(Z>0,86) ≈ 19,5% (exact ≈ 19,3%)."},
+
+    {t:"concept", q:"Welke associatiemaat past het best bij twee ORDINALE variabelen?",
+     o:["Pearson","Kendall's tau of Spearman","Chi-kwadraat","Lineaire regressie"], a:1,
+     u:"Ordinaal ↔ ordinaal: Kendall's tau of Spearman. (Nominaal → chi-kwadraat; scale/interval-ratio → Pearson of regressie.)"},
+    {t:"concept", q:"Welke toets gebruik je voor de samenhang tussen twee NOMINALE variabelen?",
+     o:["Pearson-correlatie","Chi-kwadraat","Spearman","Lineaire regressie"], a:1,
+     u:"Nominale variabelen hebben geen volgorde → chi-kwadraat in een kruistabel (Crosstabs → Statistics → Chi-square)."},
+    {t:"concept", q:"Welke grafiek is geschikt voor een NOMINALE variabele?",
+     o:["Histogram","Boxplot","Staafdiagram (barplot) of cirkeldiagram","Scatterplot"], a:2,
+     u:"Nominaal (categorieën zonder volgorde): barplot of (bij weinig categorieën) een cirkeldiagram. Histogram en boxplot horen bij scale-data."},
+    {t:"concept", q:"Welke grafiek hoort bij een SCALE-variabele (interval/ratio)?",
+     o:["Cirkeldiagram","Histogram of boxplot","Staafdiagram met categorieën","Geen enkele"], a:1,
+     u:"Scale-data (continu): histogram (frequentieverdeling) of boxplot (mediaan + uitschieters)."},
+    {t:"concept", q:"Wat geldt voor de Pearson-correlatie?",
+     o:["Ze bewijst een oorzakelijk verband","Ze meet een lineair verband, maar bewijst geen oorzaak","Ze werkt alleen voor nominale data","Ze ligt altijd tussen 0 en 1"], a:1,
+     u:"Correlatie ≠ causaliteit. Pearson meet de sterkte en richting van een LINEAIR verband (tussen −1 en +1), maar zegt niets over oorzaak en gevolg."},
+    {t:"concept", q:"Waarvoor dient een regressierechte?",
+     o:["Om te voorspellen","Om categorieën te tellen","Om de mediaan te vinden","Om data te hercoderen"], a:0,
+     u:"Regressie modelleert het verband tussen variabelen en laat je een waarde VOORSPELLEN op basis van een andere variabele."},
+    {t:"toets", q:"Wanneer verwerp je de nulhypothese?",
+     o:["Als p > α","Als p ≤ α","Altijd bij n ≥ 30","Nooit"], a:1,
+     u:"Is de p-waarde kleiner dan of gelijk aan het significantieniveau α (bv. 0,05), dan verwerp je H0: het resultaat is significant. Ezelsbruggetje: 'p klein → H0 weg'."},
+    {t:"toets", q:"Wat is een Type I-fout?",
+     o:["H0 verwerpen terwijl H0 waar is","H0 behouden terwijl H0 fout is","De steekproef te klein kiezen","Een rekenfout maken"], a:0,
+     u:"Type I (α) = je verwerpt H0 onterecht (vals alarm). Type II (β) = je behoudt H0 terwijl Ha waar is (een gemiste vondst)."},
+    {t:"toets", q:"Wat gebeurt er met de standaardfout (σ/√n) als n toeneemt?",
+     o:["Ze wordt groter","Ze wordt kleiner","Ze blijft gelijk","Ze wordt 0"], a:1,
+     u:"Standaardfout = σ/√n. Een grotere n → grotere noemer → kleinere standaardfout → een preciezere schatting van het gemiddelde."},
+    {t:"concept", q:"Welk meetniveau heeft temperatuur in °C?",
+     o:["Nominaal","Ordinaal","Interval (geen absoluut nulpunt)","Ratio"], a:2,
+     u:"°C heeft geen absoluut nulpunt (0 °C is niet 'geen temperatuur') → intervalschaal. Bij een absoluut nulpunt (lengte, gewicht, tijd) is het ratio."},
+    {t:"toets", q:"Wat betekent een betrouwbaarheidsinterval van 95%?",
+     o:["95% kans dat dít interval de parameter bevat","Bij herhaald steekproeven bevat ongeveer 95% van zulke intervallen de echte parameter","Dat 95% van de data in het interval ligt","Dat de p-waarde 0,05 is"], a:1,
+     u:"Een 95%-BI betekent dat, als je het experiment vaak zou herhalen, ongeveer 95% van de zo berekende intervallen de werkelijke populatieparameter bevat. Het zegt niets over 95% van de individuele waarnemingen."},
+    {t:"kans", q:"Wanneer zijn twee gebeurtenissen A en B stochastisch ONAFHANKELIJK?",
+     o:["Als P(A∩B) = P(A) + P(B)","Als P(A∩B) = P(A) · P(B)","Als ze disjunct zijn","Als P(A) = P(B)"], a:1,
+     u:"Onafhankelijk ⇔ P(A∩B) = P(A)·P(B) (en dan ook P(B|A) = P(B)). Let op: disjunct (elkaar uitsluitend) is iets ánders dan onafhankelijk."},
+    {t:"kans", q:"Wanneer gebruik je een binomiale verdeling?",
+     o:["Bij een continu gemiddelde","Bij een vast aantal onafhankelijke pogingen met telkens 2 uitkomsten en een vaste kans p","Altijd bij n ≥ 30","Alleen bij normaalverdeelde data"], a:1,
+     u:"Binomiaal B(n; p): een vast aantal n onafhankelijke pogingen, elk met 2 uitkomsten (succes/mislukking) en een constante succeskans p. Je telt het aantal successen."}
+  ],
+  theory: [
+    {h:"Meetniveaus & grafieken", items:[
+      "Nominaal = categorieën zonder volgorde (bv. geslacht) → barplot / cirkeldiagram.",
+      "Ordinaal = met volgorde, geen vaste afstand (bv. rang) → geordende barplot.",
+      "Interval = vaste afstand, géén absoluut nulpunt (bv. °C). Ratio = mét absoluut nulpunt (lengte, gewicht, tijd) → histogram / boxplot.",
+      "Welke toets/maat? Nominaal → chi-kwadraat · Ordinaal → Kendall/Spearman · Scale → Pearson / regressie."]},
+    {h:"Kansrekenen", items:[
+      "Voorwaardelijke kans: P(A|B) = P(A∩B) / P(B).",
+      "Onafhankelijk ⇔ P(A∩B) = P(A)·P(B). Disjunct (sluit elkaar uit) ⇔ P(A∩B) = 0.",
+      "Vereniging: P(A∪B) = P(A) + P(B) − P(A∩B).",
+      "Bayes: P(A|B) = P(B|A)·P(A) / P(B).",
+      "Combinatie C(n,k) = volgorde maakt niet uit. Variatie/permutatie = volgorde maakt wél uit."]},
+    {h:"Verdelingen", items:[
+      "Binomiaal B(n;p): vast aantal onafhankelijke pogingen, 2 uitkomsten, vaste kans p. P(X=k)=C(n,k)·pᵏ·(1−p)ⁿ⁻ᵏ.",
+      "Normaalverdeling: z = (x − µ) / σ, kans opzoeken in de z-tabel.",
+      "Centrale limietstelling: het steekproef-GEMIDDELDE is ≈ normaal verdeeld bij grote n (vuistregel n ≥ 30), ongeacht de populatievorm.",
+      "Standaardfout van het gemiddelde = σ/√n (kleiner bij grotere n).",
+      "Continuïteitscorrectie (±0,5) als je een binomiale verdeling benadert met de normaalverdeling."]},
+    {h:"Schatten & betrouwbaarheidsinterval", items:[
+      "Goede schatter: zuiver (onvertekend), consistent en efficiënt (kleine variantie).",
+      "BI = schatting ± foutenmarge, met marge = z · σ/√n.",
+      "Groter n → smaller interval. Hogere betrouwbaarheid (bv. 99% i.p.v. 95%) → breder interval.",
+      "Interpretatie: bij herhaald steekproeven bevat ~95% van de 95%-intervallen de echte parameter."]},
+    {h:"Hypothesetoetsing", items:[
+      "H0 = geen effect/verschil; Ha = wel een effect (een- of tweezijdig).",
+      "p-waarde = kans op een minstens zo extreme uitkomst áls H0 waar is.",
+      "Beslissing: p ≤ α → H0 verwerpen (significant). p > α → H0 behouden.",
+      "Type I-fout (α) = vals alarm (H0 onterecht verwerpen). Type II-fout (β) = gemiste vondst.",
+      "z-toets gemiddelde: z = (x̄ − µ) / (σ/√n). Tweezijdig: p = 2·P(Z > |z|)."]},
+    {h:"SPSS — kort", items:[
+      "Frequencies / Descriptives → beschrijvende statistiek per variabele.",
+      "Crosstabs (+ Chi-square) → samenhang tussen categorische variabelen.",
+      "Compare Means / ANOVA → gemiddelden van groepen vergelijken (sig-waarde).",
+      "Correlate → Pearson (scale) of Spearman/Kendall (ordinaal).",
+      "Transform → Compute/Recode om nieuwe variabelen te maken; Data → Select Cases om op een groep te focussen."]}
+  ],
+  hacks: [
+    {h:"p klein → H0 weg", t:"Is de p-waarde ≤ α (bv. 0,05)? Dan verwerp je de nulhypothese: het is significant. Grote p = niks aan de hand, H0 blijft."},
+    {h:"Welke toets? Kijk naar het meetniveau", t:"Nominaal = Chi-kwadraat, Ordinaal = Kendall/Spearman, Scale = Pearson/Regressie. Onthoud: 'NOCS → Chi, K/S, Pearson'."},
+    {h:"Correlatie ≠ causaliteit", t:"Een sterk verband bewijst geen oorzaak. Pearson zegt hoe sterk en welke richting (−1 tot +1), niet wie wat veroorzaakt."},
+    {h:"Standaardfout: groter n, kleiner foutje", t:"σ/√n — de n staat in de noemer. Meer data = kleinere standaardfout = preciezere schatting = smaller BI."},
+    {h:"CLT: gemiddelden worden normaal", t:"Het steekproef-gemiddelde wordt bij grote n (≥30) ongeveer normaal verdeeld, wat de populatie ook is. Gaat over gemiddelden, niet over de ruwe data."},
+    {h:"Binomiaal-check", t:"Gebruik B(n;p) als: vast aantal pogingen, telkens 2 uitkomsten, vaste kans p, en de pogingen zijn onafhankelijk."},
+    {h:"Type I vs Type II", t:"Type I = vals alarm (je 'vindt' iets dat er niet is, kans α). Type II = gemiste vondst (je mist een echt effect, kans β)."},
+    {h:"Onafhankelijk = vermenigvuldigen", t:"P(A∩B) = P(A)·P(B) ⇒ onafhankelijk. Verwar dit niet met disjunct (= sluit elkaar uit, P(A∩B)=0)."}
+  ]
+};
+</script>
+<script>
+(function(){
+  "use strict";
+  var D=window.STAT, app=document.getElementById("app");
+  var P={
+    book:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+    bulb:'<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+    help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+    moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+    arrowR:'<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    chevR:'<path d="m9 18 6-6-6-6"/>',
+    sparkles:'<path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/>',
+    target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    rocket:'<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+    msg:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+    refresh:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+    send:'<path d="M14.54 21.69a.5.5 0 0 0 .94-.02l6.5-19a.5.5 0 0 0-.64-.64l-19 6.5a.5.5 0 0 0-.02.94l7.93 3.18a2 2 0 0 1 1.11 1.11z"/><path d="m21.85 2.15-10.94 10.94"/>'
+  };
+  function ic(n,c){ return '<svg class="ic'+(c?" "+c:"")+'" viewBox="0 0 24 24" aria-hidden="true">'+(P[n]||"")+'</svg>'; }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+  function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+  function pct(n,d){ return d?Math.round(100*n/d):0; }
+  function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+  function lget(k,d){ try{ var v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } }
+  function lset(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+
+  D.questions.forEach(function(q,i){ q.id="q"+i; });
+  var theme=lget("stat_theme", lget("site_theme","light"));
+  function applyTheme(){ document.documentElement.setAttribute("data-theme",theme);
+    document.getElementById("themeBtn").innerHTML=(theme==="dark"?ic("sun"):ic("moon"))+'<span>'+(theme==="dark"?"Licht":"Donker")+'</span>'; }
+  applyTheme();
+  document.getElementById("themeBtn").onclick=function(){ theme=theme==="dark"?"light":"dark"; lset("stat_theme",theme); lset("site_theme",theme); applyTheme(); };
+
+  var WARM=["Geen zorgen — hier leer je nu net van.","Bijna! Dit type vraag krijg je zo onder de knie.","Foutje mag — nu weet je wat je nog moet herhalen.","Niet erg, dit onthoud je de volgende keer wél.","Rustig — één foutje zegt niets over je examen."];
+  var PRAISE=["Juist!","Goed zo!","Correct!","Sterk!","Knap!"];
+  var TOPICS={kans:"Kansrekenen & verdelingen", toets:"Toetsen & betrouwbaarheid", concept:"Concepten & SPSS"};
+
+  var TABS=[{v:"home",l:"Start",i:"book"},{v:"quiz",l:"Oefenvragen",i:"target"},{v:"theory",l:"Theorie",i:"search"},{v:"hacks",l:"Studie-hacks",i:"bulb"},{v:"feedback",l:"Feedback",i:"msg"}];
+  var tabsEl=document.getElementById("tabs");
+  tabsEl.innerHTML=TABS.map(function(t){return '<button data-view="'+t.v+'"'+(t.v==="home"?' class="on"':'')+'>'+ic(t.i)+'<span>'+t.l+'</span></button>';}).join("");
+  var tabBtns=[].slice.call(tabsEl.querySelectorAll("button"));
+  tabBtns.forEach(function(b){ b.onclick=function(){ go(b.dataset.view); }; });
+  function go(v){ state.view=v; tabBtns.forEach(function(b){b.classList.toggle("on",b.dataset.view===v);}); render(); window.scrollTo(0,0); }
+
+  var state={view:"home", quiz:null, sel:{topics:{kans:true,toets:true,concept:true}, count:15, shuffle:true}, sumq:""};
+  function setHTML(h){ app.innerHTML=h; }
+
+  function render(){
+    if(state.view==="home") return renderHome();
+    if(state.view==="quiz") return renderQuizGate();
+    if(state.view==="theory") return renderTheory();
+    if(state.view==="hacks") return renderHacks();
+    if(state.view==="feedback") return renderFeedback();
+  }
+
+  function renderHome(){
+    var byT={kans:0,toets:0,concept:0}; D.questions.forEach(function(q){byT[q.t]++;});
+    var html=
+      '<div class="hero">'+
+        '<div class="count"><b>'+D.questions.length+'</b><span>oefenvragen</span></div>'+
+        '<div class="herotext"><h1>Statistiek II oefenen</h1>'+
+        '<p>Examenvragen (nagerekend &amp; geverifieerd) + concepten · met uitleg bij elk antwoord</p></div>'+
+      '</div>'+
+      '<a class="brandstrip" href="https://berat007yildirim-ai.github.io/" title="Naar Berie’s exam space"><span class="bs-logo">B</span><span class="bs-txt"><b>Berie’s exam space</b><small>Een ander vak leren? Bekijk alle vakken</small></span><span class="bs-go">'+ic("arrowR")+'</span></a>'+
+      '<div class="seclabel">'+ic("rocket")+'Begin met oefenen</div>'+
+      '<div class="grid g2">'+
+        '<button class="mode" data-mode="quiz"><span class="me">'+ic("target")+'</span><b>Oefenvragen</b><small>Meerkeuze met directe feedback en uitleg. Kies je onderwerpen.</small></button>'+
+        '<button class="mode" data-mode="theory"><span class="me">'+ic("search")+'</span><b>Theorie</b><small>Korte samenvatting per onderwerp, met zoekfunctie.</small></button>'+
+      '</div>'+
+      '<div class="grid g2" style="margin-top:14px">'+
+        '<button class="mode" data-mode="hacks"><span class="me">'+ic("bulb")+'</span><b>Studie-hacks</b><small>Ezelsbruggetjes en slimme manieren om het te onthouden.</small></button>'+
+        '<button class="mode" id="quickStart"><span class="me">'+ic("rocket")+'</span><b>Snelle ronde</b><small>15 willekeurige vragen uit alle onderwerpen.</small></button>'+
+      '</div>'+
+      '<div class="card pad" style="margin-top:18px"><b>Onderwerpen</b>'+
+        '<p class="muted" style="font-size:13.5px;margin:8px 0 0">📊 Kansrekenen &amp; verdelingen ('+byT.kans+') · 🧪 Toetsen &amp; betrouwbaarheid ('+byT.toets+') · 🧠 Concepten &amp; SPSS ('+byT.concept+')</p></div>';
+    setHTML(html);
+    [].slice.call(document.querySelectorAll("[data-mode]")).forEach(function(el){ el.onclick=function(){ go(el.dataset.mode); }; });
+    document.getElementById("quickStart").onclick=function(){ startQuiz(shuffle(D.questions.slice()).slice(0,15)); go("quiz"); };
+  }
+
+  function renderQuizGate(){
+    if(state.quiz) return renderQuiz();
+    var s=state.sel;
+    function pool(){ return D.questions.filter(function(q){return s.topics[q.t];}); }
+    var html='<div class="card pad"><h2 style="margin-top:0">Oefenvragen</h2>'+
+      '<p class="muted">Kies onderwerpen en het aantal vragen. Na elk antwoord krijg je meteen feedback én de uitleg.</p>'+
+      '<label class="fld">Onderwerpen</label><div class="chips" id="tps">'+
+        Object.keys(TOPICS).map(function(k){return '<button class="chip'+(s.topics[k]?" on":"")+'" data-tp="'+k+'">'+esc(TOPICS[k])+'</button>';}).join("")+'</div>'+
+      '<label class="fld">Aantal vragen</label><div class="chips" id="cnt">'+
+        [10,15,20,999].map(function(n){return '<button class="chip'+(s.count===n?" on":"")+'" data-n="'+n+'">'+(n===999?"Alle":n)+'</button>';}).join("")+'</div>'+
+      '<label class="fld"><input type="checkbox" id="shuf" '+(s.shuffle?"checked":"")+'> Willekeurige volgorde</label>'+
+      '<div class="row" style="margin-top:18px"><button class="btn" id="startQ">Start '+ic("arrowR")+'</button><span class="muted" id="poolN"></span></div></div>';
+    setHTML(html);
+    function refresh(){ var n=pool().length; document.getElementById("poolN").textContent=n+" vragen beschikbaar"; document.getElementById("startQ").disabled=n===0; }
+    [].slice.call(document.querySelectorAll("#tps .chip")).forEach(function(b){ b.onclick=function(){ s.topics[b.dataset.tp]=!s.topics[b.dataset.tp]; b.classList.toggle("on"); refresh(); }; });
+    [].slice.call(document.querySelectorAll("#cnt .chip")).forEach(function(b){ b.onclick=function(){ s.count=+b.dataset.n; renderQuizGate(); }; });
+    document.getElementById("shuf").onchange=function(e){ s.shuffle=e.target.checked; };
+    document.getElementById("startQ").onclick=function(){ var p=pool(); if(s.shuffle)p=shuffle(p); if(s.count<p.length)p=p.slice(0,s.count); startQuiz(p); };
+    refresh();
+  }
+
+  function startQuiz(items){ state.quiz={items:items.map(function(q){return {q:q,opts:shuffle(q.o.map(function(t,i){return {text:t,ok:i===q.a};}))};}), idx:0, answered:false, picked:-1, correct:0, wrong:[], done:false}; renderQuiz(); }
+
+  function renderQuiz(){
+    var Q=state.quiz; if(Q.done) return renderResult();
+    var cur=Q.items[Q.idx], q=cur.q;
+    var html='<div class="card pad">'+
+      '<div class="runtop"><span class="pill">'+esc(TOPICS[q.t])+'</span><div class="bar"><i data-w="'+pct(Q.idx,Q.items.length)+'"></i></div><span>'+(Q.idx+1)+'/'+Q.items.length+'</span></div>'+
+      '<div class="qtext">'+esc(q.q)+'</div>'+
+      '<div id="opts">'+cur.opts.map(function(o,i){return '<button class="opt" data-i="'+i+'"><span class="k">'+String.fromCharCode(65+i)+'</span><span>'+esc(o.text)+'</span></button>';}).join("")+'</div>'+
+      '<div id="fb"></div>'+
+      '<div class="row" style="justify-content:space-between;margin-top:6px"><span class="muted" style="font-size:12px">Toets <span class="kbd">A–D</span> · <span class="kbd">Enter</span> = volgende</span><button class="btn hide" id="nextBtn">Volgende '+ic("arrowR")+'</button></div></div>';
+    setHTML(html);
+    var i2=document.querySelector(".bar>i"); requestAnimationFrame(function(){ if(i2) i2.style.width=i2.getAttribute("data-w")+"%"; });
+    var optBtns=[].slice.call(document.querySelectorAll("#opts .opt"));
+    var nb=document.getElementById("nextBtn"); nb.onclick=next;
+    function showAnswered(i){
+      optBtns.forEach(function(b){ var bi=+b.dataset.i; b.disabled=true; if(cur.opts[bi].ok)b.classList.add("correct"); else if(bi===i)b.classList.add("wrong"); });
+      var ok=cur.opts[i].ok, fb=document.getElementById("fb"); fb.className="feedback "+(ok?"ok":"no");
+      var juist=cur.opts.filter(function(o){return o.ok;})[0].text;
+      fb.innerHTML=ok?"<b>"+rnd(PRAISE)+" ✓</b>":"<b>"+rnd(WARM)+"</b><span class=\"sub\">Juiste antwoord: "+esc(juist)+"</span>";
+      var w=document.createElement("div"); w.innerHTML='<div class="whybox"><h4>'+ic("sparkles")+'Waarom?</h4>'+esc(q.u)+'</div>'; fb.appendChild(w);
+      nb.classList.remove("hide"); nb.innerHTML=(Q.idx+1>=Q.items.length)?"Bekijk resultaat "+ic("arrowR"):"Volgende "+ic("arrowR");
+    }
+    function pick(i){ if(Q.answered)return; Q.answered=true; Q.picked=i; if(cur.opts[i].ok)Q.correct++; else Q.wrong.push(q); showAnswered(i); nb.focus(); }
+    optBtns.forEach(function(b){ b.onclick=function(){ pick(+b.dataset.i); }; });
+    function next(){ if(!Q.answered)return; Q.idx++; Q.answered=false; Q.picked=-1; if(Q.idx>=Q.items.length)Q.done=true; renderQuiz(); }
+    if(Q.answered) showAnswered(Q.picked);
+    state.key=function(e){ if(!Q.answered){ var k=e.key.toLowerCase(); var idx="abcde".indexOf(k); if(idx<0&&/[1-5]/.test(k))idx=+k-1; if(idx>=0&&idx<cur.opts.length){pick(idx);e.preventDefault();} } else if(e.key==="Enter"||e.key===" "){ next(); e.preventDefault(); } };
+  }
+
+  function renderResult(){
+    var Q=state.quiz, p=pct(Q.correct,Q.items.length);
+    var msg=p>=80?"Sterk werk! 🎉":p>=60?"Goed bezig 👍":"Blijf oefenen — je komt er 💪";
+    var html='<div class="card pad results center"><span class="pill">Statistiek II</span><div class="big">'+p+'%</div>'+
+      '<p style="font-weight:600;margin:0 0 4px;font-size:17px">'+msg+'</p><p class="muted">'+Q.correct+' van '+Q.items.length+' juist</p>'+
+      '<div class="row" style="justify-content:center;margin-top:14px">'+
+        (Q.wrong.length?'<button class="btn" id="retry">Herhaal '+Q.wrong.length+' foute vragen</button>':'')+
+        '<button class="btn ghost" id="again">Nieuwe ronde</button><button class="btn ghost" id="home">Naar start</button></div></div>';
+    setHTML(html);
+    var rt=document.getElementById("retry"); if(rt) rt.onclick=function(){ startQuiz(shuffle(Q.wrong)); };
+    document.getElementById("again").onclick=function(){ state.quiz=null; renderQuizGate(); };
+    document.getElementById("home").onclick=function(){ state.quiz=null; go("home"); };
+    state.key=null;
+  }
+
+  function renderTheory(){
+    var q=state.sumq||"";
+    var html='<div class="card pad" style="margin-bottom:14px"><h2 style="margin:0 0 8px">Theorie — samenvatting</h2>'+
+      '<input type="search" id="sq" placeholder="Zoek een begrip… (bv. p-waarde, regressie, binomiaal)" value="'+esc(q)+'"></div><div id="list">'+theoryList(q)+'</div>';
+    setHTML(html);
+    var si=document.getElementById("sq"); si.oninput=function(){ state.sumq=si.value; document.getElementById("list").innerHTML=theoryList(si.value); si.focus(); };
+  }
+  function theoryList(query){
+    var Q=query.trim().toLowerCase(), out="", n=0;
+    D.theory.forEach(function(sec){
+      var items=sec.items.filter(function(it){ return !Q || it.toLowerCase().indexOf(Q)>=0 || sec.h.toLowerCase().indexOf(Q)>=0; });
+      if(!items.length) return; n++;
+      out+='<details class="acc"'+(Q?" open":(n===1?" open":""))+'><summary><span class="n">'+ic("search")+'</span>'+esc(sec.h)+ic("chevR","caret")+'</summary><div class="body"><ul>'+items.map(function(it){return '<li>'+hl(esc(it),Q)+'</li>';}).join("")+'</ul></div></details>';
+    });
+    return out||'<p class="muted center">Geen resultaten voor "'+esc(query)+'".</p>';
+  }
+  function hl(t,q){ if(!q)return t; try{ return t.replace(new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig"),"<mark>$1</mark>"); }catch(e){ return t; } }
+
+  function renderHacks(){
+    var html='<div class="card pad" style="margin-bottom:16px"><h2 style="margin:0 0 6px">Studie-hacks</h2><p class="muted" style="margin:0">Ezelsbruggetjes om de kernideeën van statistiek te onthouden.</p></div>'+
+      '<div class="tipgrid">'+D.hacks.map(function(t){return '<div class="tip"><h4>'+ic("bulb")+esc(t.h)+'</h4><p>'+esc(t.t)+'</p></div>';}).join("")+'</div>';
+    setHTML(html);
+  }
+
+  function renderFeedback(){
+    var html='<div class="card pad"><h2 style="margin-top:0">Feedback &amp; klachten</h2>'+
+      '<p class="muted">Fout in een vraag, een idee, of werkt iets niet? Laat het hier weten — het komt rechtstreeks bij de maker terecht.</p>'+
+      '<label class="fld" for="fbMsg">Je bericht</label><textarea id="fbMsg" rows="5" placeholder="Beschrijf de fout of je idee…"></textarea>'+
+      '<label class="fld" for="fbWaar">Over welke vraag? <span class="muted">(optioneel)</span></label><input type="text" id="fbWaar" placeholder="bv. de vraag over de p-waarde">'+
+      '<label class="fld" for="fbEmail">Je e-mail <span class="muted">(optioneel)</span></label><input type="email" id="fbEmail" placeholder="naam@voorbeeld.be">'+
+      '<input type="text" id="fbBot" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0">'+
+      '<div class="row" style="margin-top:16px;align-items:center"><button class="btn" id="fbSend">'+ic("send")+'Versturen</button><span id="fbStatus" style="font-size:13px"></span></div></div>';
+    setHTML(html);
+    document.getElementById("fbSend").onclick=function(){
+      var status=document.getElementById("fbStatus");
+      if(document.getElementById("fbBot").value) return;
+      var msg=document.getElementById("fbMsg").value.trim();
+      if(!msg){ status.style.color="var(--bad)"; status.textContent="Schrijf eerst een bericht."; return; }
+      var btn=document.getElementById("fbSend"); btn.disabled=true; status.style.color="var(--muted)"; status.textContent="Versturen…";
+      var em=document.getElementById("fbEmail").value.trim();
+      var payload={access_key:"cbaac6dd-7382-4c16-9463-97d63d712fcf", subject:"Statistiek-tool: feedback", from_name:"Statistiek oefentool",
+        vraag:document.getElementById("fbWaar").value||"-", email:em||"-", bericht:msg};
+      if(em) payload.replyto=em;
+      fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(payload)})
+        .then(function(r){return r.json();}).then(function(d){
+          if(d&&d.success){ setHTML('<div class="card pad results center"><div style="font-size:42px">✅</div><h2 style="margin:6px 0">Bedankt!</h2><p class="muted">Je melding is verstuurd.</p><button class="btn" id="bk" style="margin-top:8px">Terug naar start</button></div>'); document.getElementById("bk").onclick=function(){go("home");}; }
+          else { btn.disabled=false; status.style.color="var(--bad)"; status.textContent="Versturen mislukt — probeer later opnieuw."; }
+        }).catch(function(){ btn.disabled=false; status.style.color="var(--bad)"; status.textContent="Geen verbinding — probeer later opnieuw."; });
+    };
+  }
+
+  document.addEventListener("keydown",function(e){ if(state.key) state.key(e); });
+  render();
+})();
+</script>
+</body>
+</html>
