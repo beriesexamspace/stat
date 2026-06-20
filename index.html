@@ -560,7 +560,8 @@ window.STAT = {
       '<p class="muted">Fout in een vraag, een idee, of werkt iets niet? Laat het hier weten — het komt rechtstreeks bij de maker terecht.</p>'+
       '<label class="fld" for="fbMsg">Je bericht</label><textarea id="fbMsg" rows="5" placeholder="Beschrijf de fout of je idee…"></textarea>'+
       '<label class="fld" for="fbWaar">Over welke vraag? <span class="muted">(optioneel)</span></label><input type="text" id="fbWaar" placeholder="bv. de vraag over de p-waarde">'+
-      '<label class="fld" for="fbEmail">Je e-mail <span class="muted">(optioneel)</span></label><input type="email" id="fbEmail" placeholder="naam@voorbeeld.be">'+
+      '<label class="fld" for="fbNaam">Je naam <span class="muted">(optioneel)</span></label><input type="text" id="fbNaam" placeholder="zodat we je kunnen bedanken">'+
+      '<label class="fld" for="fbEmail">Je e-mail <span class="muted">(optioneel — als je een antwoord wilt)</span></label><input type="email" id="fbEmail" placeholder="naam@voorbeeld.be">'+
       '<input type="text" id="fbBot" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0">'+
       '<div class="row" style="margin-top:16px;align-items:center"><button class="btn" id="fbSend">'+ic("send")+'Versturen</button><span id="fbStatus" style="font-size:13px"></span></div></div>';
     setHTML(html);
@@ -571,14 +572,24 @@ window.STAT = {
       if(!msg){ status.style.color="var(--bad)"; status.textContent="Schrijf eerst een bericht."; return; }
       var btn=document.getElementById("fbSend"); btn.disabled=true; status.style.color="var(--muted)"; status.textContent="Versturen…";
       var em=document.getElementById("fbEmail").value.trim();
-      var payload={access_key:"cbaac6dd-7382-4c16-9463-97d63d712fcf", subject:"Statistiek-tool: feedback", from_name:"Statistiek oefentool",
-        vraag:document.getElementById("fbWaar").value||"-", email:em||"-", bericht:msg};
+      var nm=document.getElementById("fbNaam").value.trim();
+      var waar=document.getElementById("fbWaar").value.trim();
+      var payload={access_key:"cbaac6dd-7382-4c16-9463-97d63d712fcf", subject:"Statistiek-tool: feedback", from_name:(nm||"Statistiek oefentool"),
+        naam:nm||"-", vraag:waar||"-", email:em||"-", bericht:msg};
       if(em) payload.replyto=em;
+      // vangnet: als de verzenddienst blokkeert (bv. spamfilter) of er is geen verbinding,
+      // bieden we een directe mailto-knop aan zodat de melding NOOIT stilletjes verdwijnt.
+      function failFallback(reden){
+        var body="Feedback Statistiek-tool%0D%0A%0D%0ANaam: "+encodeURIComponent(nm||"-")+"%0D%0AOver welke vraag: "+encodeURIComponent(waar||"-")+"%0D%0AE-mail: "+encodeURIComponent(em||"-")+"%0D%0A%0D%0ABericht:%0D%0A"+encodeURIComponent(msg);
+        var mailto="mailto:berat007yildirim@gmail.com?subject="+encodeURIComponent("Statistiek-tool: feedback")+"&body="+body;
+        setHTML('<div class="card pad"><h2 style="margin-top:0">Automatisch versturen lukte niet</h2><p class="muted">'+reden+' Geen zorgen — klik hieronder en je melding wordt geopend in je e-mail, helemaal klaar om te versturen:</p><a class="btn" href="'+mailto+'">'+ic("send")+'Mail mijn melding direct</a><div style="margin-top:14px"><button class="btn ghost" id="bk">Terug naar start</button></div></div>');
+        document.getElementById("bk").onclick=function(){go("home");};
+      }
       fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify(payload)})
         .then(function(r){return r.json();}).then(function(d){
           if(d&&d.success){ setHTML('<div class="card pad results center"><div style="font-size:42px">✅</div><h2 style="margin:6px 0">Bedankt!</h2><p class="muted">Je melding is verstuurd.</p><button class="btn" id="bk" style="margin-top:8px">Terug naar start</button></div>'); document.getElementById("bk").onclick=function(){go("home");}; }
-          else { btn.disabled=false; status.style.color="var(--bad)"; status.textContent="Versturen mislukt — probeer later opnieuw."; }
-        }).catch(function(){ btn.disabled=false; status.style.color="var(--bad)"; status.textContent="Geen verbinding — probeer later opnieuw."; });
+          else { failFallback("Onze verzenddienst blokkeerde het bericht."); }
+        }).catch(function(){ failFallback("Er was even geen verbinding."); });
     };
   }
 
